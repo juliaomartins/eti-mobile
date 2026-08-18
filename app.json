@@ -65,6 +65,14 @@
           "color": "#007AFF",
           "defaultChannel": "prezensa-lembra"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
       ]
     ],
     "experiments": {

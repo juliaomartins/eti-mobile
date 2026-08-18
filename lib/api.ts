@@ -15,8 +15,10 @@ import {
 import {
   clearSession,
   getAccessToken,
+  getManualHost,
   getPreferredHost,
   getRefreshToken,
+  setManualHost,
   setPreferredHost,
   setTokens,
 } from "./storage";
@@ -59,11 +61,49 @@ function applyHost(host: string) {
   plain.defaults.baseURL = host;
 }
 
-/** Restores the host that last answered, so a dead one isn't retried first. */
+/**
+ * Set once a teacher has configured a server by hand. While it holds a value
+ * it is the only candidate: someone who typed an address meant it, and
+ * silently falling back to a compiled-in default would send their punches to
+ * a different server than the one on screen.
+ */
+let manualHost: string | null = null;
+
+/** What failover may choose between: the manual host alone, or the defaults. */
+const candidateHosts = () => (manualHost ? [manualHost] : API_HOSTS);
+
+/**
+ * Restores the configured server, then the host that last answered.
+ *
+ * The saved-host guard stays limited to API_HOSTS because that value is only
+ * ever written by the probe; a hand-typed address arrives through
+ * `applyManualHost` instead and is not filtered.
+ */
 const hostReady = (async () => {
+  const manual = await getManualHost();
+  if (manual) {
+    manualHost = manual;
+    applyHost(manual);
+    return;
+  }
+
   const saved = await getPreferredHost();
   if (saved && API_HOSTS.includes(saved)) applyHost(saved);
 })();
+
+/**
+ * Points the client at a hand-configured server, or clears it with null and
+ * hands control back to the compiled-in candidates.
+ */
+export async function applyManualHost(host: string | null): Promise<void> {
+  manualHost = host;
+  await setManualHost(host);
+
+  applyHost(host ?? API_HOSTS[0]);
+}
+
+/** The configured server, for screens that display or edit it. */
+export const getConfiguredHost = () => manualHost;
 
 export const getActiveHost = () => activeHost;
 
@@ -145,11 +185,13 @@ let hostResolution: Promise<string | null> | null = null;
  * on the same probe, and only a host that actually answered is remembered.
  */
 function resolveHost(): Promise<string | null> {
-  hostResolution ??= firstReachable(API_HOSTS)
+  hostResolution ??= firstReachable(candidateHosts())
     .then(async (host) => {
       if (host && host !== activeHost) {
         applyHost(host);
-        await setPreferredHost(host);
+        // Only the probe's own record is updated. A manually configured host
+        // is the teacher's decision and is never rewritten from here.
+        if (!manualHost) await setPreferredHost(host);
         console.warn(`[api] host resolved to ${host}`);
       }
 
@@ -283,7 +325,7 @@ api.interceptors.response.use(
       // two addresses: the office server was answering, just not within the
       // timeout, and every timed-out request dragged the whole app onto the
       // hotspot address and back.
-      if (config && !config._hostResolved && API_HOSTS.length > 1) {
+      if (config && !config._hostResolved && candidateHosts().length > 1) {
         config._hostResolved = true;
 
         const usedHost = config.baseURL;

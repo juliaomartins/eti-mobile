@@ -1,12 +1,16 @@
-import { apiErrorMessage } from "@/lib/api";
+import Feather from "@expo/vector-icons/Feather";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
+
+import { apiErrorMessage, getActiveHost } from "@/lib/api";
 import { login } from "@/lib/auth";
-import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
+import { checkServer, type ServerCheck } from "@/lib/server-check";
 import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -20,7 +24,27 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [server, setServer] = useState<ServerCheck | null>(null);
   const router = useRouter();
+
+  // Re-checked on focus, so returning from the settings screen reflects the
+  // address that was just saved. A teacher sees the server is unreachable
+  // before typing a password, instead of after a failed login.
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+
+      checkServer(getActiveHost())
+        .then((result) => {
+          if (isMounted) setServer(result);
+        })
+        .catch(() => {});
+
+      return () => {
+        isMounted = false;
+      };
+    }, []),
+  );
 
   const handleLogin = async () => {
     if (isSubmitting) return;
@@ -53,6 +77,38 @@ export default function LoginScreen() {
           style={styles.container}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
+          {/* Server status and settings */}
+          <View style={styles.serverBar}>
+            {server ? (
+              <View style={styles.serverStatus}>
+                <View
+                  style={[
+                    styles.serverDot,
+                    { backgroundColor: server.online ? "#16A34A" : "#DC2626" },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.serverText,
+                    { color: server.online ? "#16A34A" : "#DC2626" },
+                  ]}
+                >
+                  {server.online ? "Online" : "Offline"}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.serverStatus} />
+            )}
+
+            <Pressable
+              hitSlop={12}
+              onPress={() => router.push("/server")}
+              accessibilityLabel="Konfigurasaun servidor"
+            >
+              <Feather name="settings" size={22} color="#64748B" />
+            </Pressable>
+          </View>
+
           {/* Header / Logo */}
           <View style={styles.header}>
             <Image
@@ -110,6 +166,21 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  serverBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+    paddingBottom: 8,
+  },
+  serverStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 6,
+    minHeight: 20,
+  },
+  serverDot: { width: 8, height: 8, borderRadius: 4 },
+  serverText: { fontSize: 13, fontWeight: "700" },
   safeArea: {
     flex: 1,
     backgroundColor: "#F8FAFC",

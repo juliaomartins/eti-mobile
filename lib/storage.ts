@@ -14,6 +14,16 @@ const LEGACY_TOKEN_KEY = "auth_token";
 const API_HOST_KEY = "api_host";
 
 /**
+ * A host the teacher typed in themselves, on the server settings screen.
+ *
+ * Kept apart from API_HOST_KEY on purpose: that one records whichever
+ * candidate last answered and is rewritten by the failover probe, which would
+ * quietly erase a deliberate choice. This one is authoritative and only
+ * changes when someone changes it.
+ */
+const MANUAL_HOST_KEY = "manual_api_host";
+
+/**
  * The profile as `/api/auth/me/` returns it. The first block is the real
  * contract; the rest are tolerated legacy spellings.
  */
@@ -89,6 +99,12 @@ export async function saveSession(
 export const getPreferredHost = () => read(API_HOST_KEY);
 
 export const setPreferredHost = (host: string) => write(API_HOST_KEY, host);
+
+/** The manually configured backend, or null when none has been set. */
+export const getManualHost = () => read(MANUAL_HOST_KEY);
+
+export const setManualHost = (host: string | null) =>
+  write(MANUAL_HOST_KEY, host);
 
 export async function clearSession() {
   await Promise.all([
