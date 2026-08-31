@@ -43,6 +43,20 @@ export type LoronRecord = {
   status: Status | null;
   status_display: string | null;
   obs: string | null;
+
+  /*
+   * Set when an administrator refused this day's evidence. The day reads
+   * ABSENT / "Falta" like any other absence, and these are what say it was a
+   * decision somebody made rather than a day nobody marked.
+   *
+   * Optional: `istoria` builds an unmarked row from the serializer's own
+   * field list, so an older server simply omits them.
+   */
+  rejeisaun_motivu?: string | null;
+  rejeisaun_motivu_display?: string | null;
+  rejeisaun_obs?: string | null;
+  rejeita_husi_naran?: string | null;
+
   marka: Marka[];
 };
 
