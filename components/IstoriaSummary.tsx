@@ -10,6 +10,8 @@ import type { Rezumu } from "@/lib/istoria";
 export const ISTORIA_COLORS = {
   present: "#16A34A",
   late: "#F59E0B",
+  /** A day the administration refused. Same red the dashboard badges it with. */
+  rejeitadu: "#DC2626",
   muted: "#94A3B8",
   text: "#0F172A",
   subtle: "#64748B",
