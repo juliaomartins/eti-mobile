@@ -13,7 +13,7 @@
  */
 const DEFAULT_API_HOSTS = [
   "http://192.168.0.63:8000",
-  "http://10.74.33.41:8000",
+  "http://10.101.196.41:8000",
 ];
 
 const normalizeHost = (value: string) => value.trim().replace(/\/+$/, "");
