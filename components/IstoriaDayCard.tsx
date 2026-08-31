@@ -25,15 +25,24 @@ export function IstoriaDayCard({ day }: Props) {
     .flatMap((session) => session.slots)
     .filter((slot) => !!slot.foto);
 
-  const badgeColor = empty
-    ? ISTORIA_COLORS.muted
-    : late
-      ? ISTORIA_COLORS.late
-      : ISTORIA_COLORS.present;
+  // An administrator refused this day's evidence. It arrives as ABSENT with
+  // "Falta" in status_display, which the badge would otherwise have painted
+  // green -- the same colour as a day that went perfectly.
+  const rejeitadu = !!day.rejeisaun_motivu;
 
-  const badgeText = empty
-    ? "Seidauk marka"
-    : (day.status_display ?? (late ? "Atrazadu" : "Prezente"));
+  const badgeColor = rejeitadu
+    ? ISTORIA_COLORS.rejeitadu
+    : empty
+      ? ISTORIA_COLORS.muted
+      : late
+        ? ISTORIA_COLORS.late
+        : ISTORIA_COLORS.present;
+
+  const badgeText = rejeitadu
+    ? (day.status_display ?? "Falta")
+    : empty
+      ? "Seidauk marka"
+      : (day.status_display ?? (late ? "Atrazadu" : "Prezente"));
 
   return (
     <View style={[styles.card, empty && styles.cardEmpty]}>
@@ -80,6 +89,23 @@ export function IstoriaDayCard({ day }: Props) {
               <Text style={styles.thumbLabel}>{slot.oras}</Text>
             </Pressable>
           ))}
+        </View>
+      ) : null}
+
+      {rejeitadu ? (
+        <View style={styles.rejeitadu}>
+          <Text style={styles.rejeitaduTitle}>
+            Prezensa rejeita{"—"}
+            {day.rejeisaun_motivu_display ?? ""}
+          </Text>
+          {day.rejeisaun_obs ? (
+            <Text style={styles.rejeitaduObs}>{day.rejeisaun_obs}</Text>
+          ) : null}
+          {day.rejeita_husi_naran ? (
+            <Text style={styles.rejeitaduObs}>
+              Husi {day.rejeita_husi_naran}
+            </Text>
+          ) : null}
         </View>
       ) : null}
 
@@ -271,6 +297,26 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: ISTORIA_COLORS.late,
     marginTop: 1,
+  },
+  rejeitadu: {
+    marginTop: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    backgroundColor: "#FEF2F2",
+    paddingHorizontal: 11,
+    paddingVertical: 9,
+  },
+  rejeitaduTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: ISTORIA_COLORS.rejeitadu,
+  },
+  rejeitaduObs: {
+    marginTop: 2,
+    fontSize: 12,
+    lineHeight: 17,
+    color: ISTORIA_COLORS.rejeitadu,
   },
   obs: {
     fontSize: 12,
