@@ -28,7 +28,7 @@ export function IstoriaDayCard({ day }: Props) {
   // An administrator refused this day's evidence. It arrives as ABSENT with
   // "Falta" in status_display, which the badge would otherwise have painted
   // green -- the same colour as a day that went perfectly.
-  const rejeitadu = !!day.rejeisaun_motivu;
+  const rejeitadu = !!day.rejeita_motivu;
 
   const badgeColor = rejeitadu
     ? ISTORIA_COLORS.rejeitadu
@@ -96,10 +96,10 @@ export function IstoriaDayCard({ day }: Props) {
         <View style={styles.rejeitadu}>
           <Text style={styles.rejeitaduTitle}>
             Prezensa rejeita{"—"}
-            {day.rejeisaun_motivu_display ?? ""}
+            {day.rejeita_motivu_display ?? ""}
           </Text>
-          {day.rejeisaun_obs ? (
-            <Text style={styles.rejeitaduObs}>{day.rejeisaun_obs}</Text>
+          {day.rejeita_obs ? (
+            <Text style={styles.rejeitaduObs}>{day.rejeita_obs}</Text>
           ) : null}
           {day.rejeita_husi_naran ? (
             <Text style={styles.rejeitaduObs}>
