@@ -90,7 +90,7 @@ none of them records a rejection.
 
 So the honest answer to "what can the teacher do about it": **nothing in the
 app.** They talk to the administration, and an administrator undoes it from the
-dashboard with **Hasai rejeisaun**, which returns the day to `PRESENT`.
+dashboard with **Hasai rejeita**, which returns the day to `PRESENT`.
 
 > **OPEN QUESTION.** The feature is sometimes described as "the slot reopens so
 > the teacher can punch again", with the punch soft-invalidated. The code does
