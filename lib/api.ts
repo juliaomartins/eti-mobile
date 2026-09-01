@@ -353,6 +353,13 @@ export function apiErrorMessage(error: unknown, fallback: string): string {
       : "La konsege konekta ba servidor";
   }
 
+  const path = error.config?.url ?? "";
+  if (error.response.status === 401 && path.includes(AUTH_ENDPOINTS.login)) {
+    // Login refusals arrive as SimpleJWT's English `detail`; a 401 on the
+    // login path means exactly one thing.
+    return "Email ka password la loos. Koko fila fali.";
+  }
+
   const data = error.response.data as Record<string, unknown> | string | null;
   if (typeof data === "string" && data.trim()) return data;
 
