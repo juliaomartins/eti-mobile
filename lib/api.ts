@@ -328,6 +328,22 @@ api.interceptors.response.use(
 );
 
 /** Human-readable message from a DRF error body, for the existing error slots. */
+/**
+ * Server error codes the teacher should read in Tetun.
+ *
+ * Keyed on `code` and never on the English sentence beside it: SimpleJWT
+ * rewords its own `detail` strings between versions, so matching on the text
+ * would keep compiling and quietly stop matching after an upgrade.
+ */
+export const ERU_TETUN: Record<string, string> = {
+  no_active_account: "Email ka password la loos. Koko fila fali.",
+  token_not_valid: "Sesaun remata ona. Favór tama fila fali.",
+};
+
+/** The Tetun wording for a server error code, or null when it has none. */
+export const eruTetun = (code: unknown): string | null =>
+  typeof code === "string" ? (ERU_TETUN[code] ?? null) : null;
+
 export function apiErrorMessage(error: unknown, fallback: string): string {
   if (!axios.isAxiosError(error)) return fallback;
 
@@ -341,6 +357,11 @@ export function apiErrorMessage(error: unknown, fallback: string): string {
   if (typeof data === "string" && data.trim()) return data;
 
   if (data && typeof data === "object") {
+    // Ahead of `detail`, so a code we have wording for wins over the server's
+    // English. Anything unmapped falls through untouched.
+    const tetun = eruTetun(data.code);
+    if (tetun) return tetun;
+
     const direct = data.detail ?? data.message ?? data.error;
     if (typeof direct === "string") return direct;
 
