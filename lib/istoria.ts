@@ -52,9 +52,9 @@ export type LoronRecord = {
    * Optional: `istoria` builds an unmarked row from the serializer's own
    * field list, so an older server simply omits them.
    */
-  rejeisaun_motivu?: string | null;
-  rejeisaun_motivu_display?: string | null;
-  rejeisaun_obs?: string | null;
+  rejeita_motivu?: string | null;
+  rejeita_motivu_display?: string | null;
+  rejeita_obs?: string | null;
   rejeita_husi_naran?: string | null;
 
   marka: Marka[];
