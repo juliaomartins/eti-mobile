@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,20 +25,21 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (isSubmitting) return;
 
-    if (username.length === 0 || password.length === 0) {
-      setError("Favor hatama naran utilizador no password");
+    if (email.length === 0 || password.length === 0) {
+      setError("Favór hatama email no password.");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      await login(username.trim(), password);
+      await login(email.trim(), password);
       setError("");
       router.replace("/(eti)");
     } catch (e) {
-      setError(apiErrorMessage(e, "Naran utilizador ka password inkorreta"));
-      setUsername("");
+      setError(apiErrorMessage(e, "Email ka password la loos. Koko fila fali."));
+      // The email is left alone: clearing it made a teacher retype the whole
+      // address after every mistyped password.
       setPassword("");
     } finally {
       setIsSubmitting(false);
@@ -69,8 +70,8 @@ export default function LoginScreen() {
             <TextInput
               placeholder="naran@eti.tl"
               style={styles.input}
-              value={username}
-              onChangeText={setUsername}
+              value={email}
+              onChangeText={setEmail}
               autoCapitalize="none"
             />
 
@@ -89,7 +90,7 @@ export default function LoginScreen() {
               style={[styles.button, { opacity: isSubmitting ? 0.6 : 1 }]}
               onPress={handleLogin}
               disabled={
-                isSubmitting || username.length === 0 || password.length === 0
+                isSubmitting || email.length === 0 || password.length === 0
               }
             >
               {isSubmitting && <ActivityIndicator color="#FFFFFF" size={25} />}
